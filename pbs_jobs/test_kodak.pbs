@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -l walltime=48:00:00
+#PBS -N dps_kodak
+#PBS -l nodes=1:ppn=8:gpus=1
+#PBS -q gpu
+#PBS -l mem=64gb
+#PBS -o dps_kodak.txt
+#PBS -e dps_kodak.txt
+#PBS -m ae
+#PBS -M thibaut.modrzyk@creatis.insa-lyon.fr
+
+set -e
+  
+cd "${PBS_O_WORKDIR}"
+hostname
+eval "$(conda shell.bash hook)"
+conda activate journal_2024
+python test_kodak.py --model_config=configs/imagenet_model_config.yaml --diffusion_config=configs/diffusion_config.yaml

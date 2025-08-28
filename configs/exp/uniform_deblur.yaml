@@ -1,0 +1,18 @@
+conditioning:
+  method: ps
+  params:
+    scale: 0.3
+
+data:
+  name: ffhq
+  root: ./data/set3c/
+
+measurement:
+  operator:
+    name: uniform_blur
+  
+  noise: 
+    name: poisson
+    rate: 0.23529 # Alpha: 60
+    # rate: 0.15686 # Alpha: 40
+    # rate: 0.07843 # Alpha: 20
