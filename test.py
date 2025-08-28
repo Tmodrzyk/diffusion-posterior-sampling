@@ -17,7 +17,7 @@ from guided_diffusion.measurements import (
 )
 from guided_diffusion.unet import create_model
 from guided_diffusion.gaussian_diffusion import create_sampler
-from data.dataloader import kodak, get_dataloader
+from data.dataloader import get_dataloader, set3c, kodak, cbsd
 from util.img_utils import clear_color
 from util.logger import get_logger
 import random
@@ -46,9 +46,13 @@ def load_yaml(file_path: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_config", type=str)
-    parser.add_argument("--diffusion_config", type=str)
-    parser.add_argument("--task_config", type=str)
+    parser.add_argument(
+        "--model_config", type=str, default="./configs/model_config.yaml"
+    )
+    parser.add_argument(
+        "--diffusion_config", type=str, default="./configs/diffusion_config.yaml"
+    )
+    parser.add_argument("--dataset", type=str, default="set3c")
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--save_dir", type=str, default="./results")
     args = parser.parse_args()
@@ -85,9 +89,9 @@ def main():
     }
 
     noise_levels = {
-        "20": PoissonNoise(rate=0.07843),
-        "40": PoissonNoise(rate=0.15686),
-        "60": PoissonNoise(rate=0.23529),
+        "20": PoissonNoise(rate=20),
+        "40": PoissonNoise(rate=40),
+        "60": PoissonNoise(rate=60),
     }
 
     # Create metrics
@@ -97,13 +101,15 @@ def main():
 
     # Prepare dataloader
     transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.CenterCrop((256, 256)),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ]
+        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    dataset = kodak(root="./data/kodak", transforms=transform)
+    if args.dataset == "set3c":
+        dataset = set3c(root="./data/set3c", transforms=transform)
+    elif args.dataset == "kodak":
+        dataset = kodak(root="./data/kodak", transforms=transform)
+    elif args.dataset == "cbsd68":
+        dataset = cbsd(root="./data/cbsd68", transforms=transform)
+
     loader = get_dataloader(dataset, batch_size=1, num_workers=0, train=False)
 
     # Dictionary to store metrics
@@ -126,7 +132,7 @@ def main():
 
             # Create output directory
             out_path = os.path.join(
-                args.save_dir, f"test_kodak/{op_name}_{noise_level}/"
+                args.save_dir, f"test_set3c/{op_name}_{noise_level}/"
             )
             os.makedirs(out_path, exist_ok=True)
             for img_dir in ["input", "recon", "progress", "label"]:
@@ -190,7 +196,7 @@ def main():
 
             # Write results to file
             with open(
-                os.path.join(args.save_dir, "test_kodak/metrics_results.txt"), "a"
+                os.path.join(args.save_dir, "test_set3c/metrics_results.txt"), "a"
             ) as f:
                 f.write(f"\nResults for noise level {noise_level}:\n")
                 f.write("-" * 50 + "\n")

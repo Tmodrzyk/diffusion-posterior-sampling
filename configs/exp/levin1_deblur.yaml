@@ -13,7 +13,8 @@ measurement:
   
   noise: 
     name: poisson
-    rate: 0.23529 # Alpha: 60
-    # rate: 0.15686 # Alpha: 40
-    # rate: 0.07843 # Alpha: 20
+    rate: 60
+    # rate: 20
+    # rate: 10
+    # rate: 5
 

@@ -329,54 +329,15 @@ class PoissonNoise(Noise):
         Follow skimage.util.random_noise.
         """
 
-        # TODO: set one version of poisson
-
-        # version Thibaut
-
         # Normalize data to [0, 1]
-        # data = (data + 1.0) / 2.0
-        # data = data.clamp(0, 1)
-
-        # # Apply Poisson noise in PyTorch
-        # noisy_data = torch.poisson(data / self.rate) * (self.rate)
-
-        # # Convert back to [-1, 1]
-        # noisy_data = noisy_data * 2.0 - 1.0
-        # noisy_data = noisy_data.clamp(-1, 1)
-
-        # return noisy_data
-        # version 3 (stack-overflow)
-        import numpy as np
-
         data = (data + 1.0) / 2.0
         data = data.clamp(0, 1)
-        device = data.device
-        data = data.detach().cpu()
-        data = torch.from_numpy(
-            np.random.poisson(data * 255.0 * self.rate) / 255.0 / self.rate
-        )
-        data = data * 2.0 - 1.0
-        data = data.clamp(-1, 1)
-        return data.to(device)
 
-        # version 2 (skimage)
-        # if data.min() < 0:
-        #     low_clip = -1
-        # else:
-        #     low_clip = 0
+        # Apply Poisson noise in PyTorch
+        noisy_data = torch.poisson(data * self.rate) / (self.rate)
 
-        # # Determine unique values in iamge & calculate the next power of two
-        # vals = torch.Tensor([len(torch.unique(data))])
-        # vals = 2 ** torch.ceil(torch.log2(vals))
-        # vals = vals.to(data.device)
+        # Convert back to [-1, 1]
+        noisy_data = noisy_data * 2.0 - 1.0
+        noisy_data = noisy_data.clamp(-1, 1)
 
-        # if low_clip == -1:
-        #     old_max = data.max()
-        #     data = (data + 1.0) / (old_max + 1.0)
-
-        # data = torch.poisson(data * vals) / float(vals)
-
-        # if low_clip == -1:
-        #     data = data * (old_max + 1.0) - 1.0
-
-        # return data.clamp(low_clip, 1.0)
+        return noisy_data.to(data.device)
