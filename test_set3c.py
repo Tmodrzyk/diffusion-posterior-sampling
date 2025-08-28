@@ -46,9 +46,15 @@ def load_yaml(file_path: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_config", type=str)
-    parser.add_argument("--diffusion_config", type=str)
-    parser.add_argument("--task_config", type=str)
+    parser.add_argument(
+        "--model_config", type=str, default="./configs/model/model_config.yaml"
+    )
+    parser.add_argument(
+        "--diffusion_config", type=str, default="./configs/diffusion_config.yaml"
+    )
+    parser.add_argument(
+        "--task_config", type=str, default="./configs/exp/gaussian_deblur.yaml"
+    )
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--save_dir", type=str, default="./results")
     args = parser.parse_args()
