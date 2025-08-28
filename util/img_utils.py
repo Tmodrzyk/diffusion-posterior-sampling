@@ -294,7 +294,6 @@ class Blurkernel(nn.Module):
                 3, 3, self.kernel_size, stride=1, padding=0, bias=False, groups=3
             ),
         )
-
         self.weights_init()
 
     def forward(self, x):
@@ -305,6 +304,31 @@ class Blurkernel(nn.Module):
             n = np.zeros((self.kernel_size, self.kernel_size))
             n[self.kernel_size // 2, self.kernel_size // 2] = 1
             k = scipy.ndimage.gaussian_filter(n, sigma=self.std)
+            k = torch.from_numpy(k)
+            self.k = k
+            for name, f in self.named_parameters():
+                f.data.copy_(k)
+        elif self.blur_type == "uniform":
+            k = np.load(
+                "/home/modrzyk/code/diffusion-posterior-sampling/data/kernels/uniform.npy"
+            )
+            k = torch.from_numpy(k)
+            self.k = k
+
+            for name, f in self.named_parameters():
+                f.data.copy_(k)
+        elif self.blur_type == "levin1":
+            k = np.load(
+                "/home/modrzyk/code/diffusion-posterior-sampling/data/kernels/Levin_09_1.npy"
+            )
+            k = torch.from_numpy(k)
+            self.k = k
+            for name, f in self.named_parameters():
+                f.data.copy_(k)
+        elif self.blur_type == "levin4":
+            k = np.load(
+                "/home/modrzyk/code/diffusion-posterior-sampling/data/kernels/Levin_09_4.npy"
+            )
             k = torch.from_numpy(k)
             self.k = k
             for name, f in self.named_parameters():
